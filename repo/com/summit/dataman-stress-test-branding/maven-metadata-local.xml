@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.summit</groupId>
+  <artifactId>dataman-stress-test-branding</artifactId>
+  <versioning>
+    <versions>
+      <version>0.1.0-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20120607140706</lastUpdated>
+  </versioning>
+</metadata>
