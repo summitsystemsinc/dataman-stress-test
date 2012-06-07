@@ -2,11 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-    <artifactId>dataman-stress-parent</artifactId>
-    <groupId>com.summit</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-
+        <artifactId>dataman-stress-parent</artifactId>
+        <groupId>com.summit</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <scm>
+        <developerConnection>scm:git:git@github.com:summitsystemsinc/dataman-stress-test.git</developerConnection>
+        <connection>scm:git:git://github.com/summitsystemsinc/dataman-stress-test.git</connection>
+        <url>http://github.com/summitsystemsinc/dataman-stress-test</url>
+    </scm>
     <groupId>com.summit</groupId>
     <artifactId>dataman-stress-test-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -51,11 +55,11 @@
                         <target>1.6</target>
                     </configuration>
                 </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-            </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -63,8 +67,8 @@
     <modules>
         <module>branding</module>
         <module>application</module>
-    <module>dataman-stress-test-plugin</module>
-  </modules>
+        <module>dataman-stress-test-plugin</module>
+    </modules>
 
     <properties>
         <netbeans.version>RELEASE712</netbeans.version>
