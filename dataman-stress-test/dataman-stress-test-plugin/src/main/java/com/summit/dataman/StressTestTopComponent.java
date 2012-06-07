@@ -93,6 +93,7 @@ public final class StressTestTopComponent extends TopComponent {
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         timeoutSpinner = new javax.swing.JSpinner();
+        logDialogCheckbox = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel1.text")); // NOI18N
 
@@ -159,7 +160,7 @@ public final class StressTestTopComponent extends TopComponent {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -182,6 +183,8 @@ public final class StressTestTopComponent extends TopComponent {
         org.openide.awt.Mnemonics.setLocalizedText(jLabel6, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel6.text")); // NOI18N
 
         timeoutSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
+
+        org.openide.awt.Mnemonics.setLocalizedText(logDialogCheckbox, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.logDialogCheckbox.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -221,10 +224,12 @@ public final class StressTestTopComponent extends TopComponent {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel6)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                                .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(logDialogCheckbox)))
+                        .addGap(0, 44, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTabbedPane1)
+                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addContainerGap())))
         );
         layout.setVerticalGroup(
@@ -246,7 +251,8 @@ public final class StressTestTopComponent extends TopComponent {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(logDialogCheckbox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(startButton)
@@ -269,6 +275,7 @@ public final class StressTestTopComponent extends TopComponent {
         triggerTextField.setEnabled(false);
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
+        logDialogCheckbox.setEnabled(false);
         timeoutSpinner.setEnabled(false);
         final String seriesKey = "Delay-" + delaySpinner.getValue();
         currentSeries = new XYSeries(seriesKey);
@@ -281,12 +288,13 @@ public final class StressTestTopComponent extends TopComponent {
         clearGraphButton.setEnabled(false);
         currentCount = new AtomicInteger(0);
         executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleWithFixedDelay(new SocketThread(hostTextField.getText(), (Integer) portSpinner.getValue(), triggerTextField.getText(), (Integer) timeoutSpinner.getValue()), 0l, (Integer) delaySpinner.getValue(), TimeUnit.MILLISECONDS);
+        executor.scheduleWithFixedDelay(new SocketThread(hostTextField.getText(), (Integer) portSpinner.getValue(), triggerTextField.getText(), (Integer) timeoutSpinner.getValue(), logDialogCheckbox.isSelected()), 0l, (Integer) delaySpinner.getValue(), TimeUnit.MILLISECONDS);
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
         hostTextField.setEnabled(true);
         portSpinner.setEnabled(true);
+        logDialogCheckbox.setEnabled(true);
         //.setEnabled(true);
         delaySpinner.setEnabled(true);
         triggerTextField.setEnabled(true);
@@ -311,12 +319,14 @@ public final class StressTestTopComponent extends TopComponent {
         private int port;
         private String trigger;
         private int socketTimeout;
+        private boolean appendToLog;
 
-        public SocketThread(String host, int port, String trigger, int socketTimeout) {
+        public SocketThread(String host, int port, String trigger, int socketTimeout, boolean appendToLog) {
             this.host = host;
             this.port = port;
             this.trigger = trigger;
             this.socketTimeout = socketTimeout;
+            this.appendToLog = appendToLog;
         }
 
         @Override
@@ -332,7 +342,9 @@ public final class StressTestTopComponent extends TopComponent {
                 BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
 
                 out.write(trigger + "\r\n");
-                logTextArea.append("Out:\t" + trigger + "\r\n");
+                if (appendToLog) {
+                    logTextArea.append("Out:\t" + trigger + "\r\n");
+                }
                 out.flush();
 
                 String lineIn = "";
@@ -351,7 +363,9 @@ public final class StressTestTopComponent extends TopComponent {
                         currentSeries.add(count, totalTime);
                     }
                 });
-                logTextArea.append("In:\t" + lineIn + "\r\n");
+                if (appendToLog) {
+                    logTextArea.append("In:\t" + lineIn + "\r\n");
+                }
                 s.close();
 
             } catch (UnknownHostException ex) {
@@ -377,6 +391,7 @@ public final class StressTestTopComponent extends TopComponent {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JCheckBox logDialogCheckbox;
     private javax.swing.JTextArea logTextArea;
     private javax.swing.JSpinner portSpinner;
     private javax.swing.JButton startButton;
