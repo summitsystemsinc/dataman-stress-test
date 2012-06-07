@@ -38,7 +38,7 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "Window", id = "com.summit.dataman.SimulatorTopComponent")
-@ActionReference(path = "Menu/Window",
+@ActionReference(path = "Menu/Cognex",
 position = 333)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_SimulatorAction",
 preferredID = "SimulatorTopComponent")

@@ -39,9 +39,8 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
 @ActionID(category = "Window", id = "com.summit.dataman.StressTestTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Cognex"
+  , position = 10)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_StressTestAction",
 preferredID = "StressTestTopComponent")
 @Messages({
