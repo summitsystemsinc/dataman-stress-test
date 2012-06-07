@@ -13,21 +13,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYDataset;
+import org.jfree.data.UnknownKeyException;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
@@ -39,8 +38,7 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
 @ActionID(category = "Window", id = "com.summit.dataman.StressTestTopComponent")
-@ActionReference(path = "Menu/Cognex"
-  , position = 10)
+@ActionReference(path = "Menu/Cognex", position = 10)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_StressTestAction",
 preferredID = "StressTestTopComponent")
 @Messages({
@@ -51,20 +49,19 @@ preferredID = "StressTestTopComponent")
 public final class StressTestTopComponent extends TopComponent {
 
     ScheduledExecutorService executor;
-    
     XYSeriesCollection dataSet;
-    
     XYSeries currentSeries;
     AtomicInteger currentCount;
     int tryCount = 0;
     JFreeChart chartComponent;
+
     public StressTestTopComponent() {
         initComponents();
         setName(Bundle.CTL_StressTestTopComponent());
         setToolTipText(Bundle.HINT_StressTestTopComponent());
         dataSet = new XYSeriesCollection();
-        chartComponent = ChartFactory.createXYLineChart("Tries vs Request Time", "Attempt", "Operation Time (ms)", dataSet, PlotOrientation.VERTICAL, true, true, false);
-        chartParentPanel.add(new ChartPanel(chartComponent),BorderLayout.CENTER);
+        chartComponent = ChartFactory.createXYLineChart("Tries vs Request Time", "Attempt #", "Operation Time (ms)", dataSet, PlotOrientation.VERTICAL, true, true, false);
+        chartParentPanel.add(new ChartPanel(chartComponent), BorderLayout.CENTER);
     }
 
     /**
@@ -273,13 +270,18 @@ public final class StressTestTopComponent extends TopComponent {
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
         timeoutSpinner.setEnabled(false);
-        currentSeries = new XYSeries("Delay-" + delaySpinner.getValue());
+        final String seriesKey = "Delay-" + delaySpinner.getValue();
+        currentSeries = new XYSeries(seriesKey);
+        try {
+            dataSet.removeSeries(dataSet.getSeries(seriesKey));
+        } catch (UnknownKeyException ex) {
+            //ignore... JFree should offer a "hasSeries" method.
+        }
         dataSet.addSeries(currentSeries);
         clearGraphButton.setEnabled(false);
         currentCount = new AtomicInteger(0);
         executor = Executors.newScheduledThreadPool(1);
-        dataSet.removeSeries(dataSet.getSeries("Delay-" + delaySpinner.getValue()));
-        executor.scheduleWithFixedDelay(new SocketThread(hostTextField.getText(), (Integer)portSpinner.getValue(), triggerTextField.getText()), 0l, (Integer)delaySpinner.getValue(), TimeUnit.MILLISECONDS);
+        executor.scheduleWithFixedDelay(new SocketThread(hostTextField.getText(), (Integer) portSpinner.getValue(), triggerTextField.getText(), (Integer) timeoutSpinner.getValue()), 0l, (Integer) delaySpinner.getValue(), TimeUnit.MILLISECONDS);
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
@@ -308,11 +310,13 @@ public final class StressTestTopComponent extends TopComponent {
         private String host;
         private int port;
         private String trigger;
+        private int socketTimeout;
 
-        public SocketThread(String host, int port, String trigger) {
+        public SocketThread(String host, int port, String trigger, int socketTimeout) {
             this.host = host;
             this.port = port;
             this.trigger = trigger;
+            this.socketTimeout = socketTimeout;
         }
 
         @Override
@@ -320,6 +324,9 @@ public final class StressTestTopComponent extends TopComponent {
             try {
                 long startTime = System.currentTimeMillis();
                 Socket s = new Socket(host, port);
+                if (socketTimeout > 0) {
+                    s.setSoTimeout(socketTimeout);
+                }
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 BufferedWriter out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
@@ -344,7 +351,7 @@ public final class StressTestTopComponent extends TopComponent {
                         currentSeries.add(count, totalTime);
                     }
                 });
-                logTextArea.append("In:\t" + lineIn +"\r\n");
+                logTextArea.append("In:\t" + lineIn + "\r\n");
                 s.close();
 
             } catch (UnknownHostException ex) {
