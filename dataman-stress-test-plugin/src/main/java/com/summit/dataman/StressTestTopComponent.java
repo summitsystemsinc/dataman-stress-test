@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -54,6 +55,7 @@ public final class StressTestTopComponent extends TopComponent {
     AtomicInteger currentCount;
     int tryCount = 0;
     JFreeChart chartComponent;
+    AtomicReference<Socket> connection = new AtomicReference<Socket>();
 
     public StressTestTopComponent() {
         initComponents();
@@ -128,7 +130,6 @@ public final class StressTestTopComponent extends TopComponent {
 
         connectionCheckBox.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(connectionCheckBox, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.connectionCheckBox.text")); // NOI18N
-        connectionCheckBox.setEnabled(false);
 
         chartParentPanel.setLayout(new java.awt.BorderLayout());
 
@@ -227,7 +228,7 @@ public final class StressTestTopComponent extends TopComponent {
                                 .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(logDialogCheckbox)))
-                        .addGap(0, 44, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addContainerGap())))
@@ -276,6 +277,7 @@ public final class StressTestTopComponent extends TopComponent {
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
         logDialogCheckbox.setEnabled(false);
+        connectionCheckBox.setEnabled(false);
         timeoutSpinner.setEnabled(false);
         final String seriesKey = "Delay-" + delaySpinner.getValue();
         currentSeries = new XYSeries(seriesKey);
@@ -288,7 +290,7 @@ public final class StressTestTopComponent extends TopComponent {
         clearGraphButton.setEnabled(false);
         currentCount = new AtomicInteger(0);
         executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleWithFixedDelay(new SocketThread(hostTextField.getText(), (Integer) portSpinner.getValue(), triggerTextField.getText(), (Integer) timeoutSpinner.getValue(), logDialogCheckbox.isSelected()), 0l, (Integer) delaySpinner.getValue(), TimeUnit.MILLISECONDS);
+        executor.scheduleWithFixedDelay(new SocketThread(hostTextField.getText(), (Integer) portSpinner.getValue(), triggerTextField.getText(), (Integer) timeoutSpinner.getValue(), logDialogCheckbox.isSelected(), connectionCheckBox.isSelected()), 0l, (Integer) delaySpinner.getValue(), TimeUnit.MILLISECONDS);
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
@@ -302,6 +304,17 @@ public final class StressTestTopComponent extends TopComponent {
         stopButton.setEnabled(false);
         timeoutSpinner.setEnabled(true);
         clearGraphButton.setEnabled(true);
+        connectionCheckBox.setEnabled(true);
+        if (connection.get() != null) {
+            Socket s = connection.get();
+            if (s.isConnected()) {
+                try {
+                    s.close();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
         executor.shutdown();
     }//GEN-LAST:event_stopButtonActionPerformed
 
@@ -320,22 +333,34 @@ public final class StressTestTopComponent extends TopComponent {
         private String trigger;
         private int socketTimeout;
         private boolean appendToLog;
+        private boolean connectionPerRequest;
 
-        public SocketThread(String host, int port, String trigger, int socketTimeout, boolean appendToLog) {
+        public SocketThread(String host, int port, String trigger, int socketTimeout, boolean appendToLog, boolean connectionPerRequest) {
             this.host = host;
             this.port = port;
             this.trigger = trigger;
             this.socketTimeout = socketTimeout;
             this.appendToLog = appendToLog;
+            this.connectionPerRequest = connectionPerRequest;
         }
 
         @Override
         public void run() {
             try {
                 long startTime = System.currentTimeMillis();
-                Socket s = new Socket(host, port);
-                if (socketTimeout > 0) {
-                    s.setSoTimeout(socketTimeout);
+                Socket s = null;
+
+                if (connectionPerRequest) {
+                    s = new Socket(host, port);
+                    if (socketTimeout > 0) {
+                        s.setSoTimeout(socketTimeout);
+                    }
+                } else {
+                    s = connection.get();
+                    if (s == null || s.isClosed() || !s.isConnected()) {
+                        s = new Socket(host, port);
+                        connection.set(s);
+                    }
                 }
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -366,7 +391,9 @@ public final class StressTestTopComponent extends TopComponent {
                 if (appendToLog) {
                     logTextArea.append("In:\t" + lineIn + "\r\n");
                 }
-                s.close();
+                if (connectionPerRequest) {
+                    s.close();
+                }
 
             } catch (UnknownHostException ex) {
                 Exceptions.printStackTrace(ex);
