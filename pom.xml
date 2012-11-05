@@ -64,7 +64,8 @@
         <module>branding</module>
         <module>application</module>
         <module>dataman-stress-test-plugin</module>
-    </modules>
+    <module>cognex-code</module>
+  </modules>
 
     <properties>
         <netbeans.version>RELEASE712</netbeans.version>

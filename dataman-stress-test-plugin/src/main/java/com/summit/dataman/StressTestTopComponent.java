@@ -114,7 +114,7 @@ public final class StressTestTopComponent extends TopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel3.text")); // NOI18N
 
-        delaySpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1000), Integer.valueOf(10), null, Integer.valueOf(1)));
+        delaySpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1000), Integer.valueOf(1), null, Integer.valueOf(1)));
 
         org.openide.awt.Mnemonics.setLocalizedText(stopButton, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.stopButton.text")); // NOI18N
         stopButton.setEnabled(false);
@@ -161,7 +161,7 @@ public final class StressTestTopComponent extends TopComponent {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -271,13 +271,13 @@ public final class StressTestTopComponent extends TopComponent {
         tryCount++;
         hostTextField.setEnabled(false);
         portSpinner.setEnabled(false);
-        //connectionCheckBox.setEnabled(false);
+        connectionCheckBox.setEnabled(false);
         delaySpinner.setEnabled(false);
         triggerTextField.setEnabled(false);
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
         logDialogCheckbox.setEnabled(false);
-        connectionCheckBox.setEnabled(false);
+        
         timeoutSpinner.setEnabled(false);
         final String seriesKey = "Delay-" + delaySpinner.getValue();
         currentSeries = new XYSeries(seriesKey);
@@ -297,14 +297,14 @@ public final class StressTestTopComponent extends TopComponent {
         hostTextField.setEnabled(true);
         portSpinner.setEnabled(true);
         logDialogCheckbox.setEnabled(true);
-        //.setEnabled(true);
+        connectionCheckBox.setEnabled(true);
         delaySpinner.setEnabled(true);
         triggerTextField.setEnabled(true);
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
         timeoutSpinner.setEnabled(true);
         clearGraphButton.setEnabled(true);
-        connectionCheckBox.setEnabled(true);
+        
         if (connection.get() != null) {
             Socket s = connection.get();
             if (s.isConnected()) {
