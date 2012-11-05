@@ -13,7 +13,7 @@ import java.util.Date;
 public class SummitTester {
 	
 	
-	public static String readerName = "DM200_117C04.pc.cognex.com"; // change this to the host name of your reader (or IP)
+	public static String readerName = "10.0.3.40"; // change this to the host name of your reader (or IP)
 	public static int readerTCPPort = 23;
 	
 	public static void main(String[] args) {
