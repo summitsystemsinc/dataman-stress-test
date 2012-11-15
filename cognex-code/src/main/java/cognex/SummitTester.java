@@ -16,7 +16,7 @@ public class SummitTester {
 
     public static void main(String[] args) {
 
-	String filename_withDateTime = "DataLog_" + new SimpleDateFormat("YYYYMMDD_HHmmss").format(new Date()) + ".txt";
+	String filename_withDateTime = "DataLog_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".txt";
 	//Need to create a printwriter here, so we don't log the time it takes to open the file.
 	PrintWriter out = null;
 	try {
