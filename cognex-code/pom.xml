@@ -7,7 +7,7 @@
 	<artifactId>dataman-stress-test-parent</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.summit.opc-ua</groupId>
+    <groupId>com.summit</groupId>
     <artifactId>cognex-code</artifactId>
     <name>cognex-code</name>
     <url>http://maven.apache.org</url>
