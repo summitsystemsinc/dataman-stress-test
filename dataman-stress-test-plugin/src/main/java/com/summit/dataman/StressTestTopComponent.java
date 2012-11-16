@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.prefs.Preferences;
 import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -27,6 +28,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.NbPreferences;
 import org.openide.windows.TopComponent;
 
 /**
@@ -49,6 +51,8 @@ preferredID = "StressTestTopComponent")
 })
 public final class StressTestTopComponent extends TopComponent {
 
+    public static final String LAST_HOST_KEY = "lastHost";
+    Preferences prefs = NbPreferences.forModule(StressTestTopComponent.class);
     ScheduledExecutorService executor;
     XYSeriesCollection dataSet;
     XYSeries currentSeries;
@@ -62,7 +66,7 @@ public final class StressTestTopComponent extends TopComponent {
         setName(Bundle.CTL_StressTestTopComponent());
         setToolTipText(Bundle.HINT_StressTestTopComponent());
         dataSet = new XYSeriesCollection();
-        chartComponent = ChartFactory.createXYLineChart("Tries vs Request Time", "Attempt #", "Operation Time (ms)", dataSet, PlotOrientation.VERTICAL, true, true, false);
+        chartComponent = ChartFactory.createXYBarChart("Tries vs Request Time", "Duration", false,"Count", dataSet, PlotOrientation.VERTICAL, false, false, false);
         chartParentPanel.add(new ChartPanel(chartComponent), BorderLayout.CENTER);
     }
 
@@ -87,7 +91,13 @@ public final class StressTestTopComponent extends TopComponent {
         connectionCheckBox = new javax.swing.JCheckBox();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         chartParentPanel = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
         clearGraphButton = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        cycleCountLabel = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        dataPointCountLabel = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         logTextArea = new javax.swing.JTextArea();
@@ -96,10 +106,12 @@ public final class StressTestTopComponent extends TopComponent {
         jLabel6 = new javax.swing.JLabel();
         timeoutSpinner = new javax.swing.JSpinner();
         logDialogCheckbox = new javax.swing.JCheckBox();
+        precisionSpinner = new javax.swing.JSpinner();
+        jLabel9 = new javax.swing.JLabel();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel1.text")); // NOI18N
 
-        hostTextField.setText(org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.hostTextField.text")); // NOI18N
+        hostTextField.setText(prefs.get(LAST_HOST_KEY, "0.0.0.0"));
 
         portSpinner.setModel(new javax.swing.SpinnerNumberModel(23, 1, 65535, 1));
 
@@ -133,13 +145,33 @@ public final class StressTestTopComponent extends TopComponent {
 
         chartParentPanel.setLayout(new java.awt.BorderLayout());
 
+        jPanel2.setLayout(new java.awt.BorderLayout());
+
         org.openide.awt.Mnemonics.setLocalizedText(clearGraphButton, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.clearGraphButton.text")); // NOI18N
         clearGraphButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clearGraphButtonActionPerformed(evt);
             }
         });
-        chartParentPanel.add(clearGraphButton, java.awt.BorderLayout.PAGE_END);
+        jPanel2.add(clearGraphButton, java.awt.BorderLayout.CENTER);
+
+        jLabel7.setFont(new java.awt.Font("Cantarell", 1, 15)); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel7, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel7.text")); // NOI18N
+        jPanel3.add(jLabel7);
+
+        org.openide.awt.Mnemonics.setLocalizedText(cycleCountLabel, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.cycleCountLabel.text")); // NOI18N
+        jPanel3.add(cycleCountLabel);
+
+        jLabel8.setFont(new java.awt.Font("Cantarell", 1, 15)); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel8, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel8.text")); // NOI18N
+        jPanel3.add(jLabel8);
+
+        org.openide.awt.Mnemonics.setLocalizedText(dataPointCountLabel, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.dataPointCountLabel.text")); // NOI18N
+        jPanel3.add(dataPointCountLabel);
+
+        jPanel2.add(jPanel3, java.awt.BorderLayout.EAST);
+
+        chartParentPanel.add(jPanel2, java.awt.BorderLayout.SOUTH);
 
         jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.chartParentPanel.TabConstraints.tabTitle"), chartParentPanel); // NOI18N
 
@@ -161,7 +193,7 @@ public final class StressTestTopComponent extends TopComponent {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 633, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -171,7 +203,7 @@ public final class StressTestTopComponent extends TopComponent {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -187,6 +219,10 @@ public final class StressTestTopComponent extends TopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(logDialogCheckbox, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.logDialogCheckbox.text")); // NOI18N
 
+        precisionSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(5), null, null, Integer.valueOf(1)));
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel9, org.openide.util.NbBundle.getMessage(StressTestTopComponent.class, "StressTestTopComponent.jLabel9.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -194,6 +230,7 @@ public final class StressTestTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -215,23 +252,25 @@ public final class StressTestTopComponent extends TopComponent {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(triggerTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(connectionCheckBox))
-                                    .addGroup(layout.createSequentialGroup()
                                         .addComponent(stopButton)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jLabel5))))
+                                        .addComponent(jLabel5))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(triggerTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(connectionCheckBox)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel9)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(precisionSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel6)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(timeoutSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(logDialogCheckbox)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addContainerGap())))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -248,7 +287,9 @@ public final class StressTestTopComponent extends TopComponent {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(triggerTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(connectionCheckBox))
+                    .addComponent(connectionCheckBox)
+                    .addComponent(precisionSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
@@ -270,17 +311,21 @@ public final class StressTestTopComponent extends TopComponent {
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         tryCount++;
         hostTextField.setEnabled(false);
+        prefs.put(LAST_HOST_KEY, hostTextField.getText());
+
         portSpinner.setEnabled(false);
         connectionCheckBox.setEnabled(false);
         delaySpinner.setEnabled(false);
         triggerTextField.setEnabled(false);
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
+        precisionSpinner.setEnabled(false);
         logDialogCheckbox.setEnabled(false);
-        
+
         timeoutSpinner.setEnabled(false);
         final String seriesKey = "Delay-" + delaySpinner.getValue();
-        currentSeries = new XYSeries(seriesKey);
+        currentSeries = new XYSeries(seriesKey,true,false);
+        cycleCountLabel.setText("0");
         try {
             dataSet.removeSeries(dataSet.getSeries(seriesKey));
         } catch (UnknownKeyException ex) {
@@ -303,8 +348,9 @@ public final class StressTestTopComponent extends TopComponent {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
         timeoutSpinner.setEnabled(true);
+        precisionSpinner.setEnabled(true);
         clearGraphButton.setEnabled(true);
-        
+
         if (connection.get() != null) {
             Socket s = connection.get();
             if (s.isConnected()) {
@@ -334,6 +380,8 @@ public final class StressTestTopComponent extends TopComponent {
         private int socketTimeout;
         private boolean appendToLog;
         private boolean connectionPerRequest;
+        
+        private int precision;
 
         public SocketThread(String host, int port, String trigger, int socketTimeout, boolean appendToLog, boolean connectionPerRequest) {
             this.host = host;
@@ -342,11 +390,14 @@ public final class StressTestTopComponent extends TopComponent {
             this.socketTimeout = socketTimeout;
             this.appendToLog = appendToLog;
             this.connectionPerRequest = connectionPerRequest;
+            precision = (Integer)precisionSpinner.getValue();
+            
         }
 
         @Override
         public void run() {
             try {
+                currentSeries.setNotify(false);
                 long startTime = System.currentTimeMillis();
                 Socket s = null;
 
@@ -379,15 +430,30 @@ public final class StressTestTopComponent extends TopComponent {
                     lineIn = "SOCKET TIMED OUT!!!";
                 }
                 long endTime = System.currentTimeMillis();
-                final long totalTime = endTime - startTime;
+                final int totalTime = (int)(endTime - startTime);
                 final int count = currentCount.incrementAndGet();
-                SwingUtilities.invokeLater(new Runnable() {
+                int index = currentSeries.indexOf(totalTime/precision);
+                int setToValue;
+                if(index < 0){
+                    setToValue = 1;
+                }else{
+                    setToValue = currentSeries.getY(index).intValue()+1;
+                }
+                
+                if(count%5==0){
+                    final int dataPointCount = currentSeries.getItemCount();
+                    currentSeries.setNotify(true);
+                    SwingUtilities.invokeLater(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        currentSeries.add(count, totalTime);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            cycleCountLabel.setText(String.valueOf(count));
+                            dataPointCountLabel.setText(String.valueOf(dataPointCount));
+                        }
+                    });
+                }
+                currentSeries.addOrUpdate(totalTime/precision, setToValue);
+
                 if (appendToLog) {
                     logTextArea.append("In:\t" + lineIn + "\r\n");
                 }
@@ -406,6 +472,8 @@ public final class StressTestTopComponent extends TopComponent {
     private javax.swing.JPanel chartParentPanel;
     private javax.swing.JButton clearGraphButton;
     private javax.swing.JCheckBox connectionCheckBox;
+    private javax.swing.JLabel cycleCountLabel;
+    private javax.swing.JLabel dataPointCountLabel;
     private javax.swing.JSpinner delaySpinner;
     private javax.swing.JTextField hostTextField;
     private javax.swing.JButton jButton1;
@@ -415,12 +483,18 @@ public final class StressTestTopComponent extends TopComponent {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JCheckBox logDialogCheckbox;
     private javax.swing.JTextArea logTextArea;
     private javax.swing.JSpinner portSpinner;
+    private javax.swing.JSpinner precisionSpinner;
     private javax.swing.JButton startButton;
     private javax.swing.JButton stopButton;
     private javax.swing.JSpinner timeoutSpinner;
