@@ -9,7 +9,7 @@
     </scm>
     <groupId>com.summit</groupId>
     <artifactId>dataman-stress-test-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>dataman-stress-test-parent - ${project.version}</name>
@@ -68,7 +68,7 @@
   </modules>
 
     <properties>
-        <netbeans.version>RELEASE712</netbeans.version>
+        <netbeans.version>RELEASE72</netbeans.version>
         <brandingToken>dataman_stress_test</brandingToken>
     </properties>
 </project>
