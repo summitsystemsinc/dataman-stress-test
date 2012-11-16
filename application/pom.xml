@@ -143,6 +143,32 @@
             </build>
         </profile>
         <profile>
+            <id>deploy-update-descriptor</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>wagon-maven-plugin</artifactId>
+                        <version>1.0-beta-4</version>
+                        <configuration>
+                            <fromDir>${project.build.directory}/netbeans_site</fromDir>
+                            <includes>updates.*</includes>
+                            <url>${update.url}</url>
+                            <toDir>${update.dir}/dataman-stress-test/</toDir>
+                            <serverId>${update.serverId}</serverId>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.wagon</groupId>
+                                <artifactId>wagon-ssh</artifactId>
+                                <version>2.2</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>gh-pages</id>
             <build>
                 <plugins>
