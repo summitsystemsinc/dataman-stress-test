@@ -133,6 +133,9 @@
                                     <goal>autoupdate</goal>
                                     <goal>build-installers</goal>
                                 </goals>
+                                <configuration>
+                                    <distBase>summit-artifactory::default::http://devel.summitsystemsinc.net/artifactory/repo</distBase>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
